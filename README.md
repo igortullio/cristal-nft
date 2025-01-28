@@ -1,14 +1,28 @@
-# Cristal avatars
+# Cristal NFT
 
-This is a project for generating avatars from a set of images.
+The project is designed to create unique avatar images by combining various layers of images. The layers consist of a **background**, a **base**, and several **additional items** (such as glasses, hats, and ties), allowing for infinite customization combinations.
+
+### Folder Structure:
+- **background/**: This folder contains various background images (e.g., apartment, beach, street). Each background image will serve as the base layer for the generated avatars.
+- **base/**: This folder contains the default base image, which is required for every generated avatar (e.g., `cristal.png`). The base image will always be combined with one of the background images to form the core of the avatar.
+- **Additional Layers (e.g., glasses, hats, ties)**: These folders contain various optional items that can be combined with the base and background layers. The items are optional and can be included or omitted from the final avatar.
+
+### Avatar Generation Logic:
+1. The generator starts by selecting a random background image from the **background/** folder.
+2. The **base** image is then applied on top of the background image.
+3. Optional items from the **additional layers** (like glasses, hats, and ties) are layered on top, forming different combinations.
+4. The output is a unique avatar image generated randomly from the available combinations.
+
+The project ensures that each avatar includes at least the background and base layers, and allows for dynamic combinations of additional layers to customize the final avatar image.
+
 Based on [pixel-punk-avatars](https://github.com/pixegami/pixel-punk-avatars)
 
-### Requirements
+## Requirements
 
 * Python 3.6 or higher
-* [PIL](https://pillow.readthedocs.io/en/stable/) (Install by running `pip install pillow`)
+* [Pillow](https://pillow.readthedocs.io/en/stable/)
 
-### Usage
+## Usage
 
 ```bash
 python generate_avatar.py
