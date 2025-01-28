@@ -27,3 +27,8 @@ Based on [pixel-punk-avatars](https://github.com/pixegami/pixel-punk-avatars)
 ```bash
 python generate_avatar.py
 ```
+
+## Examples
+![ex-001](https://github.com/user-attachments/assets/221c5694-e7cc-495c-97f3-7526e193abda)
+![ex-002](https://github.com/user-attachments/assets/62240245-3a71-4434-b63e-15eca0ab4f51)
+![ex-003](https://github.com/user-attachments/assets/76067d3b-97ba-42c1-bc82-86507cabf58c)
