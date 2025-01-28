@@ -1,16 +1,13 @@
 import os
-import random
+from typing import List
 
 
 class Layer:
     def __init__(self, path: str):
         self.path = path
-        self.rarity: float = 1.0
+        self.images = self.build_images()
 
-    def get_random_image_path(self):
+    def build_images(self) -> List[str]:
         image_file_names = os.listdir(self.path)
-        random_image_file_name = random.choice(image_file_names)
-        return os.path.join(self.path, random_image_file_name)
-
-    def should_generate(self) -> bool:
-        return random.random() < self.rarity
+        images = [os.path.join(self.path, f) for f in image_file_names if f.endswith('.png')]
+        return images

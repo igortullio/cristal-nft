@@ -1,3 +1,4 @@
+from itertools import chain, product
 import os
 import random
 from typing import List
@@ -7,57 +8,61 @@ from layer import Layer
 
 class AvatarGenerator:
     def __init__(self, images_path: str):
-        self.layers: List[Layer] = self.load_image_layers(images_path)
-        self.background_color = (120, 150, 180)
-        self.rare_background_color = (255, 225, 150)
-        self.rare_background_chance = 0.05
+        self.background_layers: Layer
+        self.base_layers: Layer
+        self.additional_layers: List[Layer] = []
         self.output_path: str = "./output"
         os.makedirs(self.output_path, exist_ok=True)
+        self.load_all_layers(images_path)
 
-    def load_image_layers(self, images_path: str):
+    def load_all_layers(self, images_path: str):
         sub_paths = sorted(os.listdir(images_path))
-        layers: List[Layer] = []
         for sub_path in sub_paths:
             layer_path = os.path.join(images_path, sub_path)
-            layer = Layer(layer_path)
-            layers.append(layer)
+            if sub_path == 'background':
+                self.background_layers = Layer(layer_path)
+            elif sub_path == 'base':
+                self.base_layers = Layer(layer_path)
+            else:
+                self.additional_layers.append(Layer(layer_path))
 
-        layers[2].rarity = 0.80
-        layers[3].rarity = 0.15
+    def execute(self):
+        print("AvatarGenerator: generating avatars!")
+        combinations = self.generate_combinations()
+        sequences = self.generate_random_numbers(len(combinations))
+        for i, combination in enumerate(combinations):
+            self.save_image(sequences[i], self.render_avatar_image(combination), combination)
 
-        return layers
+    def generate_random_numbers(self, numberOfCombinations):
+        numbers = list(range(1, numberOfCombinations + 1))
+        random.shuffle(numbers)
+        return numbers
 
-    def generate_image_sequence(self):
-        image_path_sequence = []
-        for layer in self.layers:
-            if layer.should_generate():
-                image_path = layer.get_random_image_path()
-                image_path_sequence.append(image_path)
-
-        return image_path_sequence
-
-    def render_avatar_image(self, image_path_sequence: List[str]):
-
-        if random.random() < self.rare_background_chance:
-            bg_color = self.rare_background_color
-        else:
-            bg_color = self.background_color
-
-        image = Image.new("RGBA", (24, 24), bg_color)
+    def render_avatar_image(self, image_path_sequence: List[str]) -> Image.Image:
+        image = Image.new("RGBA", (768, 1024), 0)
         for image_path in image_path_sequence:
-            layer_image = Image.open(image_path)
+            layer_image = Image.open(image_path).convert("RGBA")
             image = Image.alpha_composite(image, layer_image)
         return image
 
-    def save_image(self, image: Image.Image, i: int = 0):
-        image_index = str(i).zfill(4)
-        image_file_name = f"avatar_{image_index}.png"
+    def save_image(self, sequence: int, image: Image.Image, image_path_sequence: List[str]):
+        image_postfix = '_'.join([os.path.basename(image_path).replace(".png", "") for image_path in image_path_sequence if 'base' not in image_path])
+        image_file_name = f"{sequence:03}__{image_postfix}.png"
         image_save_path = os.path.join(self.output_path, image_file_name)
         image.save(image_save_path)
 
-    def generate_avatar(self, n: int = 1):
-        print("AvatarGenerator: Generating Avatar!")
-        for i in range(n):
-            image_path_sequence = self.generate_image_sequence()
-            image = self.render_avatar_image(image_path_sequence)
-            self.save_image(image, i)
+    def generate_combinations(self):
+        all_combinations = []
+        for background in self.background_layers.images:
+            for base in self.base_layers.images:
+                base_combination = [background, base]
+                layer_images_by_layers = [layer.images for layer in self.additional_layers]
+                for subset in self.generate_layer_subsets(layer_images_by_layers):
+                    all_combinations.append(base_combination + subset)
+        return all_combinations
+
+    def generate_layer_subsets(self, layer_images_by_category):
+        subsets = []
+        for layer in layer_images_by_category:
+            subsets.append([[]] + [[image] for image in layer])
+        return [list(chain.from_iterable(combo)) for combo in product(*subsets)]
